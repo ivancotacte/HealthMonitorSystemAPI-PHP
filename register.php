@@ -46,8 +46,8 @@ if (isset($_POST['submit'])) {
 </head>
 <body>
 <div class="container d-flex justify-content-center align-items-center min-vh-100"> 
-    <div class="row border rounded-4 p-3 bg-white shadow box-area">
-      <div class="col-md-5 rounded-4 d-flex justify-content-center align-items-center flex-column left-box"
+    <div class="row border rounded-3 p-3 bg-white shadow box-area">
+      <div class="col-md-5 rounded-3 d-flex justify-content-center align-items-center flex-column left-box"
         style="background: #030067">
       </div>
       <div class="col-md-7 right-box">
@@ -58,53 +58,56 @@ if (isset($_POST['submit'])) {
           </div>
           <div>
             <?php echo $msg; ?>
-            <form action="" method="post">
+            <form id="myForm" action="" method="post" novalidate>
               <label class="form-label">First Name:</label>
               <div class="input-group mb-2">
                 <input type="text" name="firstName" class="form-control bg-light fs-6" placeholder="Juan" required />
               </div>
               <label class="form-label">Middle Name:</label>
               <div class="input-group mb-2">
-                <input type="text" name="middleName" class="form-control bg-light fs-6" placeholder="Martinez" />
+                <input type="text" name="middleName" class="form-control bg-light fs-6" placeholder="" />
               </div>
               <label class="form-label">Last Name:</label>
               <div class="input-group mb-2">
                 <input type="text" name="lastName" class="form-control bg-light fs-6" placeholder="Dela Cruz" required />
               </div>
-              <label class="form-label">Suffix:</label>
-              <div class="input-group mb-2">
-                <select name="suffix" id="suffix" class="form-select bg-light fs-6">
-                  <option value="">Suffix</option>
-                  <option value="jr">Jr</option>
-                  <option value="sr">Sr</option>
-                  <option value="II">II</option>
-                  <option value="III">III</option>
-                  <option value="IV">IV</option>
-                </select>
-              </div>
+<label class="form-label">Suffix:</label>
+<div class="input-group mb-2">
+    <select name="suffix" id="suffix" class="form-select bg-light fs-6">
+        <option value="">Select suffix</option>
+        <option value="jr">Jr</option>
+        <option value="sr">Sr</option>
+        <option value="II">II</option>
+        <option value="III">III</option>
+        <option value="IV">IV</option>
+    </select>
+</div>
+
               <label class="form-label"> Age: </label>
               <div class="input-group mb-2">
                 <input type="number" name="age" class="form-control bg-light fs-6" required />
               </div>
-              <label class="form-label"> Gender: </label>
-              <div class="input-group mb-2">
-                  <select name="gender" id="gender" class="form-select bg-light fs-6" required>
-                      <option value="">Gender</option>
-                      <option value="male">Male</option>
-                      <option value="female">Female</option>
-                  </select>
-              </div>
+            <label class="form-label">Gender: </label>
+            <div class="input-group mb-2">
+                <select name="gender" id="gender" class="form-select bg-light fs-6" required>
+                    <option value="">Select your gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
               <label class="form-label"> Height (CM): </label>
               <div class="input-group mb-2">
-                <input type="number" name="height" class="form-control bg-light fs-6" required />
+                <input type="number" name="height" placeholder="Enter your Height" class="form-control bg-light fs-6" required />
               </div>
               <label class="form-label"> Contact Number: </label>
               <div class="input-group mb-2">
-                <input type="number" name="contactNum" class="form-control bg-light fs-6" required />
+                <input type="text" class="form-control bg-light fs-6" id="phone" required pattern="[0-9]{11}" placeholder="Enter Phone Number" />
+                <div class="invalid-feedback">Please enter a valid 11-digit phone number.</div>
               </div>
               <label class="form-label">Email address:</label>
               <div class="input-group mb-3">
-                <input type="email" name="email" class="form-control bg-light fs-6" placeholder="example@example.com" required />
+                <input type="email" name="email" id="email" class="form-control bg-light fs-6" placeholder="example@example.com" required />
+                <div class="invalid-feedback">Please enter a valid email address.</div>
               </div>
               <div class="input-group mb-2">
                 <button type="submit" name="submit" class="btn btn-lg w-100 fs-6" style="background-color: #030067; color: #ececec;">
@@ -117,6 +120,27 @@ if (isset($_POST['submit'])) {
       </div>
     </div>
 </div>
+<script>
+    'use strict'
+    var form = document.getElementById("myForm");
+
+    form.addEventListener("submit", function (event) {
+        if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+        }
+
+        let phoneInput = document.getElementById("phone");
+        let phoneRegex = /^[0-9]{11}$/;
+        if (!phoneRegex.test(phoneInput.value)) {
+            phoneInput.setCustomValidity("Please enter a valid 10-digit phone number.");
+        } else {
+            phoneInput.setCustomValidity("");
+        }
+
+        form.classList.add('was-validated')
+    })
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
 </body>
