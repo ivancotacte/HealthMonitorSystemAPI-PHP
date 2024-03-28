@@ -13,10 +13,11 @@ if (isset($_POST['submit'])) {
     $contactNum = $_POST['contactNum'];
     $email = $_POST['email'];
     
-    $select = "SELECT * FROM tbl_healthmonitor WHERE email='{$email}'";
-    $result = mysqli_query($conn, $select);
+    $stmt = $conn->prepare("SELECT * FROM tbl_healthmonitor WHERE email = ?");  
+    $stmt->execute([$email]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if(mysqli_num_rows($result) > 0){
+    if($result){
         $msg = "<div class='alert alert-danger'>Email already exists.</div>";
     } else {
         $current_time = date("Y-m-d H:i:s");
@@ -26,14 +27,17 @@ if (isset($_POST['submit'])) {
         if ($result) {
             $msg = "<div class='alert alert-success'>Account successfully created.</div>";
 
-            $newId = mysqli_insert_id($conn);
+            $newId = $conn->lastInsertId();
             header("Location: checking.php?id=$newId");
+            exit;
         } else {
             $msg = "<div class='alert alert-danger'>Failed to create account.</div>";
         }
     }
+
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -105,7 +109,7 @@ if (isset($_POST['submit'])) {
                         </div>
                         <label class="form-label">Contact Number:</label>
                         <div class="input-group mb-2">
-                            <input type="text" class="form-control bg-light fs-6" id="phone" required pattern="[0-9]{11}" placeholder="Enter Phone Number" />
+                            <input type="text" class="form-control bg-light fs-6" name="contactNum" id="phone" required pattern="[0-9]{11}" placeholder="Enter Phone Number" />
                             <div class="invalid-feedback">Please enter a valid 11-digit phone number.</div>
                         </div>
                         <label class="form-label">Email address:</label>
