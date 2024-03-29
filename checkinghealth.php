@@ -1,5 +1,9 @@
 <?php
-session_start();
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+require 'vendor/autoload.php';
 include 'php/connect.php';
 
 $msg = "";
@@ -13,12 +17,39 @@ if (isset($_POST['submit'])) {
     $stmt->execute([$id]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    $fetch = $result;
+
     if ($result) {
         $stmt = $conn->prepare("UPDATE tbl_healthmonitor SET heartRate = ? WHERE IDNumber = ?");
         $result = $stmt->execute([$heartRate, $id]);
 
         if ($result) {
-            $msg = "<div class='alert alert-success'>Heart Rate updated successfully.</div>";
+            $msg = "<div class='alert alert-success'>Successfully.</div>";
+            $mail = new PHPMailer(true);
+            $message = "<h3>Hello there! " . $fetch['firstName'] . " " . $fetch['lastName'] . "</h3>";
+
+            try {
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = '';        
+                $mail->Password   = '';  
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+
+                $mail->setFrom('cotactearmenion@gmail.com', 'GROUP 10 - LFSA322N002');
+                $mail->addAddress('cotacteivan157@gmail.com');
+
+                $mail->isHTML(true);                        
+                $mail->Subject = 'Health Monitoring System';
+                $mail->Body    =  $message;
+
+                $mail->send();
+
+                $msg = "<div class='alert alert-success'>Successfully.</div>";
+            } catch (Exception $e) {
+                $msg = "<div class='alert alert-danger'>Error sending email.</div>";    
+            }
         } else {
             $msg = "<div class='alert alert-danger'>Error updating heart rate.</div>";
         }
