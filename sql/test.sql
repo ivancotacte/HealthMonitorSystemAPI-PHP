@@ -12,6 +12,7 @@ CREATE TABLE `tbl_logdata` (
 
 CREATE TABLE `tbl_healthmonitor` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
+    `IDNumber` varchar(255) NOT NULL,
     `firstName` varchar(255) NOT NULL,
     `middleName` varchar(255) NOT NULL,
     `lastName` varchar(255) NOT NULL,
