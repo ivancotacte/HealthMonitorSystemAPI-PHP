@@ -12,7 +12,10 @@ if (isset($_POST['submit'])) {
     $height = $_POST['height'];
     $contactNum = $_POST['contactNum'];
     $email = $_POST['email'];
-    
+
+    // Generate a random 6-digit number
+    $randomID = "HMS-" . str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
+
     $stmt = $conn->prepare("SELECT * FROM tbl_healthmonitor WHERE email = ?");  
     $stmt->execute([$email]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -21,21 +24,20 @@ if (isset($_POST['submit'])) {
         $msg = "<div class='alert alert-danger'>Email already exists.</div>";
     } else {
         $current_time = date("Y-m-d H:i:s");
-        $stmt = $conn->prepare("INSERT INTO tbl_healthmonitor (firstName, middleName, lastName, suffix, age, gender, height, contactNum, email, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $result = $stmt->execute([$firstName, $middleName, $lastName, $suffix, $age, $gender, $height, $contactNum, $email, $current_time]);
+        $stmt = $conn->prepare("INSERT INTO tbl_healthmonitor (IDNumber, firstName, middleName, lastName, suffix, age, gender, height, contactNum, email, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $result = $stmt->execute([$randomID, $firstName, $middleName, $lastName, $suffix, $age, $gender, $height, $contactNum, $email, $current_time]);
 
         if ($result) {
+            $newId = $randomID;
             $msg = "<div class='alert alert-success'>Account successfully created.</div>";
-
-            $newId = $conn->lastInsertId();
-            header("Location: checking.php?id=$newId");
+            header("Location: checkinghealth.php?id=$newId");
             exit;
         } else {
             $msg = "<div class='alert alert-danger'>Failed to create account.</div>";
         }
     }
-
 }
+
 ?>
 
 
@@ -58,7 +60,7 @@ if (isset($_POST['submit'])) {
             <div class="row align-items-center">
                 <div class="header-text mb-4">
                     <h2>User Registration Form</h2>
-                    <p>To register for Health Monitoring, please make sure you meet the following requirements:</p>
+                    <p>To check your health status, please ensure that you fulfill the following criteria:</p>
                 </div>
                 <div>
                     <?php echo $msg; ?>
