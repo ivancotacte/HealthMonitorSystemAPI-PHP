@@ -12,6 +12,7 @@ $id = $_GET['id'];
 
 if (isset($_POST['submit'])) {
     $heartRate = $_POST['heartRate'];
+    $weight = $_POST['weight'];
 
     $stmt = $conn->prepare("SELECT * FROM tbl_healthmonitor WHERE IDNumber = ?");
     $stmt->execute([$id]);
@@ -20,20 +21,26 @@ if (isset($_POST['submit'])) {
     $fetch = $result;
 
     if ($result) {
-        $stmt = $conn->prepare("UPDATE tbl_healthmonitor SET heartRate = ? WHERE IDNumber = ?");
-        $result = $stmt->execute([$heartRate, $id]);
+        $stmt = $conn->prepare("UPDATE tbl_healthmonitor SET heartRate = ?, weight = ? WHERE IDNumber = ?");
+        $result = $stmt->execute([$heartRate, $weight, $id]);
 
         if ($result) {
             $msg = "<div class='alert alert-success'>Successfully.</div>";
             $mail = new PHPMailer(true);
-            $message = "<h3>Hello there! " . $fetch['firstName'] . " " . $fetch['lastName'] . "</h3>";
+            $message = "<h3>Dear " . $fetch['firstName'] . " " . $fetch['lastName'] . ",</h3>";
+            $message .= "<p>We would like to inform you about the latest health update:</p>";
+            $message .= "<ul>";
+            $message .= "<li><strong>Weight:</strong> " . $fetch['weight'] . "</li>";
+            $message .= "<li><strong>Heart Rate:</strong> " . $fetch['heartRate'] . "</li>";
+            $message .= "</ul>";
+            $message .= "<p>Thank you for using our Health Monitoring System.</p>";
 
             try {
                 $mail->isSMTP();
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'cotactearmenion@gmail.com';        
-                $mail->Password   = 'vpbw duhx omzy xgkw'; 
+                $mail->Password   = ''; 
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
 
