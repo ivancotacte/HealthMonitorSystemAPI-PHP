@@ -38,7 +38,7 @@ if (isset($_POST['submit'])) {
                 $mail->Port       = 587;
 
                 $mail->setFrom('cotactearmenion@gmail.com', 'GROUP 10 - LFSA322N002');
-                $mail->addAddress('cotacteivan157@gmail.com');
+                $mail->addAddress($fetch['email']);
 
                 $mail->isHTML(true);                        
                 $mail->Subject = 'Health Monitoring System';
