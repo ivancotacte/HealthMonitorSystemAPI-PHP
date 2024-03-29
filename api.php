@@ -28,7 +28,7 @@ function insertWeight() {
     
     $weight = $_POST['weight'];
     $time = date("Y-m-d H:i:s");
-    $stmt = $conn->prepare("INSERT INTO `tbl_weight`(`weight`, `created_at`) VALUES (:weight, :dt)");       
+    $stmt = $conn->prepare("INSERT INTO `tbl_logdata`(`weight`, `created_at`) VALUES (:weight, :dt)");       
     $stmt->bindParam(":weight", $weight);
     $stmt->bindParam(":dt", $time);
     $stmt->execute();
