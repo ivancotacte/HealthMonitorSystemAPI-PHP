@@ -27,13 +27,37 @@ if (isset($_POST['submit'])) {
         if ($result) {
             $msg = "<div class='alert alert-success'>Successfully.</div>";
             $mail = new PHPMailer(true);
-            $message = "<h3>Dear " . $fetch['firstName'] . " " . $fetch['lastName'] . ",</h3>";
-            $message .= "<p>We would like to inform you about the latest health update:</p>";
-            $message .= "<ul>";
-            $message .= "<li><strong>Weight:</strong> " . $fetch['weight'] . "</li>";
-            $message .= "<li><strong>Heart Rate:</strong> " . $fetch['heartRate'] . "</li>";
-            $message .= "</ul>";
-            $message .= "<p>Thank you for using our Health Monitoring System.</p>";
+
+            $current_time = date("Y-m-d H:i:s");
+
+            $prompt = "Hi";
+            $ai_response = file_get_contents("https://hercai.onrender.com/v3/hercai?question=$prompt");
+            if ($ai_response === false) {
+                $ai_reply = "Error";
+            }
+            
+            $ai_reply = json_decode($ai_response, true)['reply'];
+
+            $message = "<html>
+            <head>
+            <title>Health Update</title>
+            </head>
+            <body>
+            <p>Dear " . $fetch['firstName'] . " " . $fetch['lastName'] . ",</p>
+            <p>We would like to inform you about the latest health update as of " . $current_time . ":</p>
+            <ul>
+                <li><strong>ID Number:</strong> " . htmlspecialchars($fetch['IDNumber']) . "</li>
+                <li><strong>Height:</strong> " . htmlspecialchars($fetch['height']) . " cm </li>
+                <li><strong>Weight:</strong> " . htmlspecialchars($fetch['weight']) . "</li>
+                <li><strong>Heart Rate:</strong> " . htmlspecialchars($fetch['heartRate']) . "</li>
+            </ul>
+            <p>AI Response: " . $ai_reply . "</p>
+            <p>Thank you for using our Health Monitoring System.</p>
+            </body>
+            </html>";
+
+            $headers = "MIME-Version: 1.0" . "\r\n";
+            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
 
             try {
                 $mail->isSMTP();
@@ -48,7 +72,7 @@ if (isset($_POST['submit'])) {
                 $mail->addAddress($fetch['email']);
 
                 $mail->isHTML(true);                        
-                $mail->Subject = 'Health Monitoring System';
+                $mail->Subject = "Health Update - " . $fetch['firstName'] . " " . $fetch['lastName'];
                 $mail->Body    =  $message;
 
                 $mail->send();
