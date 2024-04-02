@@ -30,7 +30,7 @@ if (isset($_POST['submit'])) {
 
             $current_time = date("Y-m-d H:i:s");
 
-            $prompt = "Hi";
+            $prompt = "what is love?";
             $ai_response = file_get_contents("https://hercai.onrender.com/v3/hercai?question=$prompt");
             if ($ai_response === false) {
                 $ai_reply = "Error";
@@ -64,7 +64,7 @@ if (isset($_POST['submit'])) {
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'cotactearmenion@gmail.com';        
-                $mail->Password   = ''; 
+                $mail->Password   = 'vpbw duhx omzy xgkw'; 
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
 
