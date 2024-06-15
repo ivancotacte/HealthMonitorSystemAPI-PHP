@@ -5,6 +5,7 @@ USE test;
 CREATE TABLE `tbl_logdata` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `heartRate` varchar(255) NOT NULL,
+    `SP02` varchar(255) NOT NULL,
     `weight` varchar(255) NOT NULL,
     `created_at` varchar(255) NOT NULL,
     PRIMARY KEY (`id`)

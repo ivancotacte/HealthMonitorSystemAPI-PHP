@@ -54,7 +54,7 @@ if (isset($_POST['submit'])) {
 <div class="container d-flex justify-content-center align-items-center min-vh-100"> 
     <div class="row border rounded-3 p-3 bg-white shadow box-area">
         <div class="col-md-5 rounded-3 d-flex justify-content-center align-items-center flex-column left-box"
-             style="background: #030067">
+            style="background: #030067">
         </div>
         <div class="col-md-7 right-box">
             <div class="row align-items-center">

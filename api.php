@@ -1,21 +1,25 @@
 <?php 
 $heartRate = 0;
+$SP02 = 0;
 $weight = 0;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["action"])) {
     switch ($_POST['action']) {
-        case 'insertHeartRate':
-            insertHeartRate();
-            break;
         case 'insertWeight':
             insertWeight();
+            break;
+        case 'showWeight':
+            showWeight();
+            break; 
+        case 'insertHeartRateSP01':
+            insertHeartRateSP01();
             break;
         case 'showHeartRate':
             showHeartRate();
             break;
-        case 'showWeight':
-            showWeight();
-            break;  
+        case 'showSPO2':
+            showSPO2();
+            break;
         default:
             break;
     }
@@ -34,39 +38,7 @@ function insertWeight() {
     $stmt->execute();
 
     echo "success";
-}   
-
-function insertHeartRate() {
-    include 'php/connect.php';
-    
-    global $heartRate;
-    
-    $heartRate = $_POST['heartRate'];
-    $time = date("Y-m-d H:i:s");
-    $stmt = $conn->prepare("INSERT INTO `tbl_logdata`(`heartRate`, `created_at`) VALUES (:heartRate, :dt)");       
-    $stmt->bindParam(":heartRate", $heartRate);
-    $stmt->bindParam(":dt", $time);
-    $stmt->execute();
-
-    echo "success";
-}
-
-function showHeartRate() {
-    include 'php/connect.php';
-
-    global $heartRate;
-
-    $logs = $conn->query("SELECT * FROM `tbl_logdata` ORDER BY `tbl_logdata`.`id` DESC");
-    
-    if ($logs->rowCount() > 0) {
-        $latest_data = $logs->fetch(PDO::FETCH_ASSOC);
-        $heartRate = $latest_data['heartRate'];
-    } else {
-        echo "failed";
-    }
-    
-    echo $heartRate;
-}
+}  
 
 function showWeight() {
     include 'php/connect.php';
@@ -83,5 +55,61 @@ function showWeight() {
     }
 
     echo $weight;
+}
+
+
+
+function insertHeartRateSP01() {
+    include 'php/connect.php'; 
+    
+    global $heartRate;
+    global $SPO2;
+    
+    $heartRate = $_POST['heartRate'];
+    $SPO2 = $_POST['SPO2'];
+    $time = date("Y-m-d H:i:s");
+    
+    $stmt = $conn->prepare("INSERT INTO `tbl_logdata`(`heartRate`, `SP02`, `created_at`) VALUES (:heartRate, :SPO2, :dt)");
+    $stmt->bindParam(":heartRate", $heartRate);
+    $stmt->bindParam(":SPO2", $SPO2);
+    $stmt->bindParam(":dt", $time);
+    
+    $stmt->execute();
+
+    echo "success";
+}
+
+function showHeartRate() {
+    include 'php/connect.php';
+
+    global $heartRate;
+
+    $logs = $conn->query("SELECT * FROM `tbl_logdata` ORDER BY `id` DESC");
+
+    if ($logs->rowCount() > 0) {
+        $latest_data = $logs->fetch(PDO::FETCH_ASSOC);
+        $heartRate = $latest_data['heartRate'];
+    } else {
+        echo "failed";
+    }
+
+    echo $heartRate;
+}
+
+function showSPO2() {
+    include 'php/connect.php';
+
+    global $SP02;
+
+    $logs = $conn->query("SELECT * FROM `tbl_logdata` ORDER BY `id` DESC");
+
+    if ($logs->rowCount() > 0) {
+        $latest_data = $logs->fetch(PDO::FETCH_ASSOC);
+        $SP02 = $latest_data['SP02'];
+    } else {
+        echo "failed";
+    }
+
+    echo $SP02;
 }
 ?>

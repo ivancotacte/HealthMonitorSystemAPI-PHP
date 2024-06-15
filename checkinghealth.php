@@ -1,3 +1,4 @@
+
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -12,6 +13,7 @@ $id = $_GET['id'];
 
 if (isset($_POST['submit'])) {
     $heartRate = $_POST['heartRate'];
+    $SpO2 = $_POST['SpO2'];
     $weight = $_POST['weight'];
 
     $stmt = $conn->prepare("SELECT * FROM tbl_healthmonitor WHERE IDNumber = ?");
@@ -21,8 +23,8 @@ if (isset($_POST['submit'])) {
     $fetch = $result;
 
     if ($result) {
-        $stmt = $conn->prepare("UPDATE tbl_healthmonitor SET heartRate = ?, weight = ? WHERE IDNumber = ?");
-        $result = $stmt->execute([$heartRate, $weight, $id]);
+        $stmt = $conn->prepare("UPDATE tbl_healthmonitor SET heartRate = ?, SpO2 = ?, weight = ? WHERE IDNumber = ?");
+        $result = $stmt->execute([$heartRate, $SpO2, $weight, $id]);
 
         if ($result) {
             $msg = "<div class='alert alert-success'>Successfully.</div>";
@@ -50,6 +52,7 @@ if (isset($_POST['submit'])) {
                 <li><strong>Height:</strong> " . htmlspecialchars($fetch['height']) . " cm </li>
                 <li><strong>Weight:</strong> " . htmlspecialchars($fetch['weight']) . "</li>
                 <li><strong>Heart Rate:</strong> " . htmlspecialchars($fetch['heartRate']) . "</li>
+                <li><strong>Oxygen Saturation:</strong> " . htmlspecialchars($fetch['SpO2']) . "</li>
             </ul>
             <p>AI Response: " . $ai_reply . "</p>
             <p>Thank you for using our Health Monitoring System.</p>
@@ -64,7 +67,7 @@ if (isset($_POST['submit'])) {
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
                 $mail->Username   = 'cotactearmenion@gmail.com';        
-                $mail->Password   = 'vpbw duhx omzy xgkw'; 
+                $mail->Password   = 'eptg zrey kmju fnri'; 
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
 
@@ -125,12 +128,17 @@ if (isset($_POST['submit'])) {
                         <div class="input-group mb-3">
                             <input type="heartRate" id="showHeartRate" name="heartRate" class="form-control bg-light fs-6" placeholder="00" required>
                             <div class="invalid-feedback">Please enter your heart rate.</div>   
-                        </div>      
+                        </div>
+                        <label for="showSP02" class="form-label">Oxygen saturation (SpO2):</label>
+                        <div class="input-group mb-3">
+                            <input type="SpO2" id="showSPO2" name="SpO2" class="form-control bg-light fs-6" placeholder="00" required>
+                            <div class="invalid-feedback">Please enter your oxygen saturation.</div>
+                        </div>
                         <label for="showWeight" class="form-label">Weight (kg):</label>   
                         <div class="input-group mb-3">
                             <input type="weight" id="showWeight" name="weight" class="form-control bg-light fs-6" placeholder="00" required>
                             <div class="invalid-feedback">Please enter your weight.</div>       
-                        </div> 
+                        </div>
                         <div class="input-group">
                             <button type="submit" name="submit" class="btn btn-lg w-100 fs-6" style="background-color: #030067; color: #ececec;">
                                 Submit
@@ -173,6 +181,22 @@ if (isset($_POST['submit'])) {
                     }
                 })
             }
+            function showSPO2() {
+                $.ajax({
+                    url: 'api.php',
+                    type: 'POST',
+                    data: {
+                        action: 'showSPO2'
+                    },
+                    dataType: 'html',
+                    success: function(result) {
+                        $('#showSPO2').val(result);
+                    },
+                    error: function() {
+                        alert("Failed to show the logs");
+                    }
+                })
+            }
             function showWeight() {
                 $.ajax({
                     url: 'api.php',
@@ -191,6 +215,7 @@ if (isset($_POST['submit'])) {
             }   
             setInterval(function() {
                 showHeartRate();
+                showSPO2();
                 showWeight();
             }, 2500);
         });
