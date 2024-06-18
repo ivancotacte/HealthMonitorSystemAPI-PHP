@@ -1,3 +1,4 @@
+
 <?php 
 $heartRate = 0;
 $SP02 = 0;
@@ -32,7 +33,7 @@ function insertWeight() {
     
     $weight = $_POST['weight'];
     $time = date("Y-m-d H:i:s");
-    $stmt = $conn->prepare("INSERT INTO `tbl_logdata`(`weight`, `created_at`) VALUES (:weight, :dt)");       
+    $stmt = $conn->prepare("INSERT INTO `tbl_weight`(`weight`, `created_at`) VALUES (:weight, :dt)");       
     $stmt->bindParam(":weight", $weight);
     $stmt->bindParam(":dt", $time);
     $stmt->execute();
@@ -45,7 +46,7 @@ function showWeight() {
 
     global $weight;
 
-    $logs = $conn->query("SELECT * FROM `tbl_logdata` ORDER BY `tbl_logdata`.`id` DESC");
+    $logs = $conn->query("SELECT * FROM `tbl_weight` ORDER BY `tbl_weight`.`id` DESC");
     
     if ($logs->rowCount() > 0) {
         $latest_data = $logs->fetch(PDO::FETCH_ASSOC);
@@ -66,10 +67,10 @@ function insertHeartRateSP01() {
     global $SPO2;
     
     $heartRate = $_POST['heartRate'];
-    $SPO2 = $_POST['SPO2'];
+    $SPO2 = $_POST['SpO2'];
     $time = date("Y-m-d H:i:s");
     
-    $stmt = $conn->prepare("INSERT INTO `tbl_logdata`(`heartRate`, `SP02`, `created_at`) VALUES (:heartRate, :SPO2, :dt)");
+    $stmt = $conn->prepare("INSERT INTO `tbl_logdata`(`heartRate`, `SpO2`, `created_at`) VALUES (:heartRate, :SPO2, :dt)");
     $stmt->bindParam(":heartRate", $heartRate);
     $stmt->bindParam(":SPO2", $SPO2);
     $stmt->bindParam(":dt", $time);
@@ -84,7 +85,7 @@ function showHeartRate() {
 
     global $heartRate;
 
-    $logs = $conn->query("SELECT * FROM `tbl_logdata` ORDER BY `id` DESC");
+    $logs = $conn->query("SELECT * FROM `tbl_logdata` ORDER BY `tbl_logdata`.`id` DESC");
 
     if ($logs->rowCount() > 0) {
         $latest_data = $logs->fetch(PDO::FETCH_ASSOC);
@@ -101,11 +102,11 @@ function showSPO2() {
 
     global $SP02;
 
-    $logs = $conn->query("SELECT * FROM `tbl_logdata` ORDER BY `id` DESC");
+    $logs = $conn->query("SELECT * FROM `tbl_logdata` ORDER BY `tbl_logdata`.`id` DESC");
 
     if ($logs->rowCount() > 0) {
         $latest_data = $logs->fetch(PDO::FETCH_ASSOC);
-        $SP02 = $latest_data['SP02'];
+        $SP02 = $latest_data['SpO2'];
     } else {
         echo "failed";
     }

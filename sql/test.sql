@@ -2,11 +2,17 @@ CREATE DATABASE IF NOT EXISTS test;
 
 USE test;
 
+CREATE TABLE `tbl_weight` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `weight` varchar(255) NOT NULL,
+    `created_at` varchar(255) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE `tbl_logdata` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `heartRate` varchar(255) NOT NULL,
-    `SP02` varchar(255) NOT NULL,
-    `weight` varchar(255) NOT NULL,
+    `SpO2` varchar(255) NOT NULL,
     `created_at` varchar(255) NOT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -23,6 +29,7 @@ CREATE TABLE `tbl_healthmonitor` (
     `height` varchar(255) NOT NULL,
     `weight` varchar(255) NOT NULL,
     `heartRate` varchar(255) NOT NULL,
+    `SpO2` varchar(255) NOT NULL,
     `contactNum` varchar(255) NOT NULL,
     `email` varchar(255) NOT NULL,
     `created_at` varchar(255) NOT NULL,

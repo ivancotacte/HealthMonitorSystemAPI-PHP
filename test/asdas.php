@@ -1,4 +1,5 @@
 <?php
+session_start();
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
@@ -7,8 +8,22 @@ require 'vendor/autoload.php';
 include 'php/connect.php';
 
 $msg = "";
-
 $id = $_GET['id'];
+
+// Check if the page is locked
+$stmt = $conn->prepare("SELECT is_locked FROM page_lock WHERE page_name = 'checkinghealth'");
+$stmt->execute();
+$lockStatus = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if ($lockStatus && $lockStatus['is_locked']) {
+    // Redirect to waiting page if locked
+    header("Location: waiting.php");
+    exit;
+} else {
+    // Set the lock
+    $stmt = $conn->prepare("UPDATE page_lock SET is_locked = true WHERE page_name = 'checkinghealth'");
+    $stmt->execute();
+}
 
 if (isset($_POST['submit'])) {
     $heartRate = $_POST['heartRate'];
@@ -32,24 +47,23 @@ if (isset($_POST['submit'])) {
             $result['heartRate'] = $heartRate;
             $result['SpO2'] = $SpO2;
             $result['weight'] = $weight;
-            
+
             $question = urlencode("Act as a Doctor and give me advice to my health here my Heart Rate " . $result['heartRate'] . ", Spo2 " . $result['SpO2'] . "% and Weight " . $result['weight'] . "kg");
             $url = "https://hercai.onrender.com/v3/hercai?question=$question";
-            
+
             $ai_response = file_get_contents($url);
-            
+
             if ($ai_response === false) {
                 $ai_reply = "Error: Unable to connect to the API.";
             } else {
                 $decoded_response = json_decode($ai_response, true);
-            
+
                 if (json_last_error() === JSON_ERROR_NONE && isset($decoded_response['reply'])) {
                     $ai_reply = $decoded_response['reply'];
                 } else {
                     $ai_reply = "Error: Invalid API response.";
                 }
-            }            
-
+            }
 
             $message = "<html>
             <head>
@@ -74,15 +88,15 @@ if (isset($_POST['submit'])) {
                 $mail->isSMTP();
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
-                $mail->Username   = 'cotactearmenion@gmail.com';        
-                $mail->Password   = 'eptg zrey kmju fnri'; 
+                $mail->Username   = 'cotactearmenion@gmail.com';
+                $mail->Password   = 'eptg zrey kmju fnri';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = 587;
 
                 $mail->setFrom('cotactearmenion@gmail.com', 'GROUP 10 - LFSA322N002');
                 $mail->addAddress($result['email']);
 
-                $mail->isHTML(true);                        
+                $mail->isHTML(true);
                 $mail->Subject = "Health Update - " . htmlspecialchars($result['firstName']) . " " . htmlspecialchars($result['lastName']);
                 $mail->Body    =  $message;
 
@@ -90,7 +104,7 @@ if (isset($_POST['submit'])) {
 
                 $msg = "<div class='alert alert-success'>Email sent successfully.</div>";
             } catch (Exception $e) {
-                $msg = "<div class='alert alert-danger'>Error sending email: {$mail->ErrorInfo}</div>";    
+                $msg = "<div class='alert alert-danger'>Error sending email: {$mail->ErrorInfo}</div>";
             }
         } else {
             $msg = "<div class='alert alert-danger'>Error updating health data.</div>";
@@ -98,12 +112,15 @@ if (isset($_POST['submit'])) {
     } else {
         $msg = "<div class='alert alert-danger'>Error: User not found.</div>";
     }
+
+    // Release the lock after processing
+    $stmt = $conn->prepare("UPDATE page_lock SET is_locked = false WHERE page_name = 'checkinghealth'");
+    $stmt->execute();
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -112,9 +129,8 @@ if (isset($_POST['submit'])) {
     <link rel="stylesheet" href="css/style.css">
     <title>Checking your Health!</title>
 </head>
-
 <body>
-    <div class="container d-flex justify-content-center align-items-center min-vh-100"> 
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="row border rounded-3 p-3 bg-white shadow box-area">
             <div class="col-md-5 rounded-3 d-flex justify-content-center align-items-center flex-column left-box" style="background: #030067">
             </div>
@@ -127,7 +143,7 @@ if (isset($_POST['submit'])) {
                             <li>Place your finger on the sensor and hold it for 20 seconds. Remove your finger when you hear a beep.</li>
                             <li>Step onto the weight scale and wait for 5 seconds. Step off when you hear a beep.</li>
                             <li>Wait for the system to automatically detect and populate your heart rate and weight values.</li>
-                            <li>Click the submit button to save the data.</li>  
+                            <li>Click the submit button to save the data.</li>
                         </ol>
                     </div>
                     <?php echo $msg; ?>
@@ -135,17 +151,17 @@ if (isset($_POST['submit'])) {
                         <label for="showHeartRate" class="form-label">Heart Rate (bpm):</label>
                         <div class="input-group mb-3">
                             <input type="text" id="showHeartRate" name="heartRate" class="form-control bg-light fs-6" placeholder="00" required>
-                            <div class="invalid-feedback">Please enter your heart rate.</div>   
+                            <div class="invalid-feedback">Please enter your heart rate.</div>
                         </div>
                         <label for="showSP02" class="form-label">Oxygen saturation (SpO2):</label>
                         <div class="input-group mb-3">
                             <input type="text" id="showSPO2" name="SpO2" class="form-control bg-light fs-6" placeholder="00" required>
                             <div class="invalid-feedback">Please enter your oxygen saturation.</div>
                         </div>
-                        <label for="showWeight" class="form-label">Weight (kg):</label>   
+                        <label for="showWeight" class="form-label">Weight (kg):</label>
                         <div class="input-group mb-3">
                             <input type="text" id="showWeight" name="weight" class="form-control bg-light fs-6" placeholder="00" required>
-                            <div class="invalid-feedback">Please enter your weight.</div>       
+                            <div class="invalid-feedback">Please enter your weight.</div>
                         </div>
                         <div class="input-group">
                             <button type="submit" name="submit" class="btn btn-lg w-100 fs-6" style="background-color: #030067; color: #ececec;">
