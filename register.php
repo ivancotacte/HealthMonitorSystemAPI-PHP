@@ -2,6 +2,10 @@
 include 'php/connect.php';
 $msg = "";
 
+if (isset($_GET['status']) && $_GET['status'] == 'email_sent') {
+    $msg = "<div class='alert alert-success'>Email sent successfully.</div>";
+}
+
 if (isset($_POST['submit'])) {
     $firstName = $_POST['firstName'];
     $middleName = $_POST['middleName'];
@@ -13,7 +17,6 @@ if (isset($_POST['submit'])) {
     $contactNum = $_POST['contactNum'];
     $email = $_POST['email'];
 
-    // Generate a random 6-digit number
     $randomID = "HMS-" . str_pad(mt_rand(0, 999999), 6, '0', STR_PAD_LEFT);
 
     $stmt = $conn->prepare("SELECT * FROM tbl_healthmonitor WHERE email = ?");  
@@ -48,7 +51,7 @@ if (isset($_POST['submit'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
-    <title>Register</title>
+    <title>Health Monitor Registration</title>
 </head>
 <body>
 <div class="container d-flex justify-content-center align-items-center min-vh-100"> 

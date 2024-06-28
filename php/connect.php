@@ -1,9 +1,9 @@
 <?php
 date_default_timezone_set('Asia/Manila');
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "test";
+$servername = "sql12.freesqldatabase.com";
+$username = "sql12716743";
+$password = "62ErRnmz1x";
+$dbname = "sql12716743";
 
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);

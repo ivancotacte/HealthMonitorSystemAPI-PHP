@@ -8,98 +8,114 @@ include 'php/connect.php';
 
 $msg = "";
 
-$id = $_GET['id'];
+$id = $_GET['id'] ?? null;
+
+if ($id === null) {
+    header("Location: register.php");
+    exit();
+}
+
+$stmt = $conn->prepare("SELECT * FROM tbl_healthmonitor WHERE IDNumber = ?");
+$stmt->execute([$id]);
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$result) {
+    header("Location: register.php");
+    exit();
+}
+
+// Check if heartRate or SpO2 already have values
+if (!empty($result['heartRate']) || !empty($result['SpO2'])) {
+    header("Location: register.php");
+    exit();
+}
 
 if (isset($_POST['submit'])) {
     $heartRate = $_POST['heartRate'];
     $SpO2 = $_POST['SpO2'];
     $weight = $_POST['weight'];
 
-    $stmt = $conn->prepare("SELECT * FROM tbl_healthmonitor WHERE IDNumber = ?");
-    $stmt->execute([$id]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $conn->prepare("UPDATE tbl_healthmonitor SET heartRate = ?, SpO2 = ?, weight = ? WHERE IDNumber = ?");
+    $updateResult = $stmt->execute([$heartRate, $SpO2, $weight, $id]);
 
-    if ($result) {
-        $stmt = $conn->prepare("UPDATE tbl_healthmonitor SET heartRate = ?, SpO2 = ?, weight = ? WHERE IDNumber = ?");
-        $updateResult = $stmt->execute([$heartRate, $SpO2, $weight, $id]);
+    if ($updateResult) {
+        $msg = "<div class='alert alert-success'>Successfully updated.</div>";
+        $mail = new PHPMailer(true);
 
-        if ($updateResult) {
-            $msg = "<div class='alert alert-success'>Successfully updated.</div>";
-            $mail = new PHPMailer(true);
+        $current_time = date("MMMM Do YYYY, h:mm:ss a");
 
-            $current_time = date("Y-m-d H:i:s");
-
-            $result['heartRate'] = $heartRate;
-            $result['SpO2'] = $SpO2;
-            $result['weight'] = $weight;
-            
-            $question = urlencode("Act as a Doctor and give me advice to my health here my Heart Rate " . $result['heartRate'] . ", Spo2 " . $result['SpO2'] . "% and Weight " . $result['weight'] . "kg");
-            $url = "https://hercai.onrender.com/v3/hercai?question=$question";
-            
-            $ai_response = file_get_contents($url);
-            
-            if ($ai_response === false) {
-                $ai_reply = "Error: Unable to connect to the API.";
-            } else {
-                $decoded_response = json_decode($ai_response, true);
-            
-                if (json_last_error() === JSON_ERROR_NONE && isset($decoded_response['reply'])) {
-                    $ai_reply = $decoded_response['reply'];
-                } else {
-                    $ai_reply = "Error: Invalid API response.";
-                }
-            }            
-
-
-            $message = "<html>
-            <head>
-            <title>Health Update</title>
-            </head>
-            <body>
-            <p>Dear " . htmlspecialchars($result['firstName']) . " " . htmlspecialchars($result['lastName']) . ",</p>
-            <p>We would like to inform you about the latest health update as of " . $current_time . ":</p>
-            <ul>
-                <li><strong>ID Number:</strong> " . htmlspecialchars($result['IDNumber']) . "</li>
-                <li><strong>Height:</strong> " . htmlspecialchars($result['height']) . " cm</li>
-                <li><strong>Weight:</strong> " . htmlspecialchars($result['weight']) . " kg</li>
-                <li><strong>Heart Rate:</strong> " . htmlspecialchars($result['heartRate']) . " bpm</li>
-                <li><strong>Oxygen Saturation:</strong> " . htmlspecialchars($result['SpO2']) . " %</li>
-            </ul>
-            <p>AI Response: " . htmlspecialchars($ai_reply) . "</p>
-            <p>Thank you for using our Health Monitoring System.</p>
-            </body>
-            </html>";
-
-            try {
-                $mail->isSMTP();
-                $mail->Host       = 'smtp.gmail.com';
-                $mail->SMTPAuth   = true;
-                $mail->Username   = 'cotactearmenion@gmail.com';        
-                $mail->Password   = 'eptg zrey kmju fnri'; 
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port       = 587;
-
-                $mail->setFrom('cotactearmenion@gmail.com', 'GROUP 10 - LFSA322N002');
-                $mail->addAddress($result['email']);
-
-                $mail->isHTML(true);                        
-                $mail->Subject = "Health Update - " . htmlspecialchars($result['firstName']) . " " . htmlspecialchars($result['lastName']);
-                $mail->Body    =  $message;
-
-                $mail->send();
-
-                $msg = "<div class='alert alert-success'>Email sent successfully.</div>";
-            } catch (Exception $e) {
-                $msg = "<div class='alert alert-danger'>Error sending email: {$mail->ErrorInfo}</div>";    
-            }
+        $result['heartRate'] = $heartRate;
+        $result['SpO2'] = $SpO2;
+        $result['weight'] = $weight;
+        
+        $question = urlencode("Act as a Doctor and give me advice to my health here my Heart Rate " . $result['heartRate'] . ", Spo2 " . $result['SpO2'] . "% and Weight " . $result['weight'] . "kg and my age is " . $result['age'] . " years old.");
+        $url = "https://hercai.onrender.com/v3/hercai?question=$question";
+        
+        $ai_response = file_get_contents($url);
+        
+        if ($ai_response === false) {
+            $ai_reply = "Error: Unable to connect to the API.";
         } else {
-            $msg = "<div class='alert alert-danger'>Error updating health data.</div>";
+            $decoded_response = json_decode($ai_response, true);
+        
+            if (json_last_error() === JSON_ERROR_NONE && isset($decoded_response['reply'])) {
+                $ai_reply = $decoded_response['reply'];
+            } else {
+                $ai_reply = "Error: Invalid API response.";
+            }
+        }
+
+        $message = "<html>
+        <head>
+        <title>Health Update</title>
+        </head>
+        <body>
+        <p>Dear " . htmlspecialchars($result['firstName']) . " " . htmlspecialchars($result['lastName']) . ",</p>
+        <p>We would like to inform you about the latest health update as of " . $current_time . ":</p>
+        <ul>
+            <li><strong>ID Number:</strong> " . htmlspecialchars($result['IDNumber']) . "</li>
+            <li><strong>Height:</strong> " . htmlspecialchars($result['height']) . " cm</li>
+            <li><strong>Weight:</strong> " . htmlspecialchars($result['weight']) . " kg</li>
+            <li><strong>Heart Rate:</strong> " . htmlspecialchars($result['heartRate']) . " bpm</li>
+            <li><strong>Oxygen Saturation:</strong> " . htmlspecialchars($result['SpO2']) . " %</li>
+        </ul>
+        <p>AI Response: " . htmlspecialchars($ai_reply) . "</p>
+        <p>Thank you for using our Health Monitoring System.</p>
+        </body>
+        </html>";
+
+        try {
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'cotactearmenion@gmail.com';        
+            $mail->Password   = 'eptg zrey kmju fnri'; 
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            $mail->setFrom('cotactearmenion@gmail.com', 'GROUP 10 - LFSA322N002');
+            $mail->addAddress($result['email']);
+
+            $mail->isHTML(true);                        
+            $mail->Subject = "Health Update - " . htmlspecialchars($result['firstName']) . " " . htmlspecialchars($result['lastName']);
+            $mail->Body    =  $message;
+
+            $mail->send();
+
+            $msg = "<div class='alert alert-success'>Email sent successfully.</div>";
+            header("Location: register.php?status=email_sent");
+            exit();
+        } catch (Exception $e) {
+            $msg = "<div class='alert alert-danger'>Error sending email: {$mail->ErrorInfo}</div>";    
         }
     } else {
-        $msg = "<div class='alert alert-danger'>Error: User not found.</div>";
+        $msg = "<div class='alert alert-danger'>Error updating health data.</div>";
     }
 }
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
